@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Batch Address Capture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #2d2654;
+        }
+
+        #video-container {
+            position: relative;
+            margin-bottom: 70px;
+        }
+
+        #camera-feed {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 640px;
+            height: 480px;
+        }
+
+        #capture-button {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 50%;
+            padding: 10px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+
+        #capture-button:hover {
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+
+        #capture-button img {
+            width: 30px;
+            height: 30px;
+        }
+
+        #results-container { /* Changed ID to results-container */
+            display: block;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            max-width: 800px; /* Increased max-width */
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #results-container h2 {
+            margin-bottom: 15px;
+            color: #2d2654;
+        }
+
+        #results-container div {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        #results-container div:last-child {
+             border-bottom: none;
+        }
+
+        #results-container strong {
+            font-weight: 600;
+            color: #333;
+        }
+
+        #error-message {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 100%;
+            text-align: left;
+            box-sizing: border-box;
+        }
+
+        #error-message h2 {
+            margin-bottom: 10px;
+            color: #721c24;
+        }
+
+        .video-results-container {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 1280px;
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 768px) {
+            .video-results-container {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+
+            #video-container {
+                margin-bottom: 0;
+                margin-right: 20px;
+            }
+
+            #results-container, #error-message {
+                margin-top: 0;
+                width: calc(95% - 20px);
+                max-width: none;
+            }
+             #camera-feed{
+                 margin-bottom: 0;
+             }
+        }
+        .right-section{
+            display: flex;
+            flex-direction: column;
+            width: calc(95% - 20px);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1>Batch Address Capture</h1>
+        <div class="video-results-container">
+            <div id="video-container">
+                <video id="camera-feed" autoplay></video>
+                <button id="capture-button">
+                    <img src="https://unpkg.com/lucide-static@latest/icons/camera.svg" alt="Capture Address">
+                </button>
+            </div>
+            <div class="right-section">
+                <div id="results-container">
+                    <div class="address-section">
+                        <h2>Extracted Address 1</h2>
+                        <p><strong>Address Text:</strong> <span id="extracted-text-1">Dummy Address 1</span></p>
+                        <p><strong>Street:</strong> <span id="extracted-street-1">123 Main St</span></p>
+                        <p><strong>City:</strong> <span id="extracted-city-1">Anytown</span></p>
+                        <p><strong>State:</strong> <span id="extracted-state-1">CA</span></p>
+                        <p><strong>Pincode:</strong> <span id="extracted-pincode-1">91234</span></p>
+                        <p><strong>Center:</strong> <span id="nodal-center-name-1">Nodal Center A</span></p>
+                    </div>
+                    <div class="address-section">
+                        <h2>Extracted Address 2</h2>
+                        <p><strong>Address Text:</strong> <span id="extracted-text-2">Dummy Address 2</span></p>
+                        <p><strong>Street:</strong> <span id="extracted-street-2">456 Oak Ave</span></p>
+                        <p><strong>City:</strong> <span id="extracted-city-2">Someville</span></p>
+                        <p><strong>State:</strong> <span id="extracted-state-2">NY</span></p>
+                        <p><strong>Pincode:</strong> <span id="extracted-pincode-2">10001</span></p>
+                         <p><strong>Center:</strong> <span id="nodal-center-name-2">Nodal Center B</span></p>
+                    </div>
+                    <div class="address-section">
+                        <h2>Extracted Address 3</h2>
+                        <p><strong>Address Text:</strong> <span id="extracted-text-3">Dummy Address 3</span></p>
+                        <p><strong>Street:</strong> <span id="extracted-street-3">789 Pine Ln</span></p>
+                        <p><strong>City:</strong> <span id="extracted-city-3">Othertown</span></p>
+                        <p><strong>State:</strong> <span id="extracted-state-3">TX</span></p>
+                        <p><strong>Pincode:</strong> <span id="extracted-pincode-3">75001</span></p>
+                        <p><strong>Center:</strong> <span id="nodal-center-name-3">Nodal Center C</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const video = document.getElementById('camera-feed');
+        const captureButton = document.getElementById('capture-button');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => console.error('Error accessing camera:', error));
+
+        captureButton.addEventListener('click', () => {
+             alert('Address captured!');
+        });
+    </script>
+</body>
+</html>

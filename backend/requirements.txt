@@ -1,0 +1,11 @@
+Flask==2.3.2
+Flask-Cors==3.0.10
+opencv-python==4.7.0.72
+numpy==1.24.3
+python-dotenv==1.0.0
+easyocr==1.6.2
+requests==2.31.0
+mysql-connector-python==8.0.33
+nltk==3.8.1
+pandas==2.0.2
+python-dateutil==2.8.2

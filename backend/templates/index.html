@@ -1,0 +1,388 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Address Capture and OCR</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+        }
+        #results {
+            margin-top: 20px;
+            text-align: left;
+            width: 640px;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            display: none;
+        }
+        #extracted-address, #geocoding-results, #nodal-center {
+            margin-bottom: 10px;
+        }
+        #error-message {
+            margin-top: 20px;
+            text-align: left;
+            width: 640px;
+            margin: 20px auto;
+            border: 1px solid red;
+            padding: 10px;
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+    <h1>Address Capture and OCR</h1>
+
+    <video id="camera-feed" width="640" height="480" autoplay></video>
+    <button id="capture-button">Capture Address</button>
+    <img id="captured-image" style="display: none; width: 640px; height: 480px;">
+
+    <div id="results" style="display: none;">
+        <div id="extracted-address">
+            <h2>Extracted Address</h2>
+            <p><strong>Address Text:</strong> <span id="extracted-text"></span></p>
+            <p><strong>Street:</strong> <span id="extracted-street"></span></p>
+            <p><strong>City:</strong> <span id="extracted-city"></span></p>
+            <p><strong>State:</strong> <span id="extracted-state"></span></p>
+            <p><strong>Pincode:</strong> <span id="extracted-pincode"></span></p>
+        </div>
+        <div id="geocoding-results">
+            <h2>Geocoding Results</h2>
+            <p><strong>Street:</strong> <span id="geocoding-street"></span></p>
+            <p><strong>City:</strong> <span id="geocoding-city"></span></p>
+            <p><strong>State:</strong> <span id="geocoding-state"></span></p>
+            <p><strong>Pincode:</strong> <span id="geocoding-pincode"></span></p>
+        </div>
+        <div id="nodal-center">
+            <h2>Nodal Delivery Center</h2>
+            <p><strong>Center:</strong> <span id="nodal-center-name"></span></p>
+        </div>
+    </div>
+
+    <div id="error-message">
+        <h2 id="error-title"></h2>
+        <p id="error-text"></p>
+    </div>
+
+    <script>
+        const video = document.getElementById('camera-feed');
+        const captureButton = document.getElementById('capture-button');
+        const capturedImage = document.getElementById('captured-image');
+        const resultsDiv = document.getElementById('results');
+        const errorMessageDiv = document.getElementById('error-message');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => console.error('Error accessing camera:', error));
+
+        captureButton.addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+            fetch('/capture_and_process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    document.getElementById('extracted-text').textContent = data.extracted_address.address_text;
+                    document.getElementById('extracted-street').textContent = data.extracted_address.street;
+                    document.getElementById('extracted-city').textContent = data.extracted_address.city;
+                    document.getElementById('extracted-state').textContent = data.extracted_address.state;
+                    document.getElementById('extracted-pincode').textContent = data.extracted_address.pincode;
+
+                    document.getElementById('geocoding-street').textContent = data.geocoding_results.google_maps_street;
+                    document.getElementById('geocoding-city').textContent = data.geocoding_results.google_maps_city;
+                    document.getElementById('geocoding-state').textContent = data.geocoding_results.google_maps_state;
+                    document.getElementById('geocoding-pincode').textContent = data.geocoding_results.google_maps_pincode;
+
+                    document.getElementById('nodal-center-name').textContent = data.nodal_delivery_center;
+
+                    errorMessageDiv.style.display = 'none';
+                    resultsDiv.style.display = 'block';
+                } else if (data.error) {
+                    document.getElementById('error-title').textContent = "Error";
+                    document.getElementById('error-text').textContent = data.error;
+                    errorMessageDiv.style.display = 'block';
+                    resultsDiv.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error during capture and process:', error);
+                document.getElementById('error-title').textContent = "Error";
+                document.getElementById('error-text').textContent = "Internal server error.";
+                errorMessageDiv.style.display = 'block';
+                resultsDiv.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Address Capture and OCR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0; /* Reset default body margin */
+            padding: 0;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column; /* Stack items vertically by default */
+            align-items: center; /* Center items horizontally */
+            padding-top: 10px;
+            padding: 20px;
+            min-height: 100vh; /* Ensure full viewport height */
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+
+        h1 {
+            margin-bottom: 1px;
+            color: #2d2654;
+        }
+
+        #video-container {
+            position: relative; /* Make sure the button's absolute positioning is relative to this container */
+            margin-bottom: 70px; /* Increased margin to accommodate the button */
+        }
+
+        #camera-feed {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 640px; /* Explicitly set width */
+            height: 480px; /* Explicitly set height */
+        }
+
+        #capture-button {
+            position: absolute;
+            bottom: -30px; /* Position below the video */
+            left: 50%; /* Initial horizontal centering */
+            transform: translateX(-50%); /* Precise horizontal centering */
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+            border: none;
+            border-radius: 50%; /* Make it round */
+            padding: 10px;      /* Padding inside the button */
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Add shadow */
+            transition: background-color 0.3s ease; /* Smooth transition */
+        }
+
+        #capture-button:hover {
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly more opaque on hover */
+        }
+
+        #capture-button img { /* Style for the camera icon */
+            width: 30px; /* Icon size */
+            height: 30px;
+        }
+
+
+        #results {
+            display: none; /* Initially hidden */
+            margin-top: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            max-width: 600px; /* Increased max-width */
+            width: 100%; /* Take up full width of parent */
+            box-sizing: border-box;
+        }
+
+        #results h2 {
+            margin-bottom: 15px;
+            color: #2d2654;
+        }
+
+        #results div {
+            margin-bottom: 15px;
+        }
+
+        #results strong {
+            font-weight: 600;
+            color: #333;
+        }
+
+        #error-message {
+            display: none; /* Initially hidden */
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            max-width: 600px; /* Increased max-width */
+            width: 100%; /* Take up full width of parent */
+            text-align: left;
+            box-sizing: border-box;
+        }
+
+        #error-message h2 {
+            margin-bottom: 10px;
+            color: #721c24;
+        }
+
+        /* Flexbox for side-by-side layout of video and results */
+        .video-results-container {
+            display: flex;
+            flex-direction: column; /* Stack on small screens */
+            align-items: stretch; /* Stretch items to container width */
+            margin-top: 20px; /* Add some margin above this container */
+            width: 100%; /* Take up the full width */
+            max-width: 1280px; /* Maximum combined width of video and results */
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 768px) {
+            .video-results-container {
+                flex-direction: row; /* Arrange side-by-side on larger screens */
+                justify-content: space-between; /* Space them out */
+                align-items: flex-start; /* Align items to the start (top in this case) */
+            }
+
+            #video-container {
+                margin-bottom: 0; /* Remove bottom margin on larger screens */
+                margin-right: 20px; /* Add right margin to video container */
+            }
+
+            #results, #error-message {
+                margin-top: 0; /* Remove top margin for results/error on larger screens */
+                width: calc(95% - 20px); /* Increased width: occupy 60% minus margin */
+                max-width: none; /* Remove max width restriction */
+            }
+             #camera-feed{
+                 margin-bottom: 0;
+             }
+        }
+        /* Added to align items, specially error message and result */
+        .right-section{
+            display: flex;
+            flex-direction: column;
+            width: calc(95% - 20px);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1>Address Capture and OCR</h1>
+
+        <div class="video-results-container">
+            <div id="video-container">
+                <video id="camera-feed" autoplay></video>
+                <button id="capture-button">
+                    <img src="https://unpkg.com/lucide-static@latest/icons/camera.svg" alt="Capture Address">
+                </button>
+            </div>
+            <div class="right-section">
+                <div id="results">
+                    <div id="extracted-address">
+                        <h2>Extracted Address</h2>
+                        <p><strong>Address Text:</strong> <span id="extracted-text"></span></p>
+                        <p><strong>Street:</strong> <span id="extracted-street"></span></p>
+                        <p><strong>City:</strong> <span id="extracted-city"></span></p>
+                        <p><strong>State:</strong> <span id="extracted-state"></span></p>
+                        <p><strong>Pincode:</strong> <span id="extracted-pincode"></span></p>
+                    </div>
+                    <div id="geocoding-results">
+                        <h2>Geocoding Results</h2>
+                        <p><strong>Street:</strong> <span id="geocoding-street"></span></p>
+                        <p><strong>City:</strong> <span id="geocoding-city"></span></p>
+                        <p><strong>State:</strong> <span id="geocoding-state"></span></p>
+                        <p><strong>Pincode:</strong> <span id="geocoding-pincode"></span></p>
+                    </div>
+                    <div id="nodal-center">
+                        <h2>Nodal Delivery Center</h2>
+                        <p><strong>Center:</strong> <span id="nodal-center-name"></span></p>
+                    </div>
+                </div>
+
+                <div id="error-message">
+                    <h2 id="error-title"></h2>
+                    <p id="error-text"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('camera-feed');
+        const captureButton = document.getElementById('capture-button');
+        const capturedImage = document.getElementById('captured-image');
+        const resultsDiv = document.getElementById('results');
+        const errorMessageDiv = document.getElementById('error-message');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => console.error('Error accessing camera:', error));
+
+        captureButton.addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+            fetch('/capture_and_process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    document.getElementById('extracted-text').textContent = data.extracted_address.address_text;
+                    document.getElementById('extracted-street').textContent = data.extracted_address.street;
+                    document.getElementById('extracted-city').textContent = data.extracted_address.city;
+                    document.getElementById('extracted-state').textContent = data.extracted_address.state;
+                    document.getElementById('extracted-pincode').textContent = data.extracted_address.pincode;
+
+                    document.getElementById('geocoding-street').textContent = data.geocoding_results.google_maps_street;
+                    document.getElementById('geocoding-city').textContent = data.geocoding_results.google_maps_city;
+                    document.getElementById('geocoding-state').textContent = data.geocoding_results.google_maps_state;
+                    document.getElementById('geocoding-pincode').textContent = data.geocoding_results.google_maps_pincode;
+
+                    document.getElementById('nodal-center-name').textContent = data.nodal_delivery_center;
+
+                    errorMessageDiv.style.display = 'none';
+                    resultsDiv.style.display = 'block';
+                } else if (data.error) {
+                    document.getElementById('error-title').textContent = "Error";
+                    document.getElementById('error-text').textContent = data.error;
+                    errorMessageDiv.style.display = 'block';
+                    resultsDiv.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error during capture and process:', error);
+                document.getElementById('error-title').textContent = "Error";
+                document.getElementById('error-text').textContent = "Internal server error.";
+                errorMessageDiv.style.display = 'block';
+                resultsDiv.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

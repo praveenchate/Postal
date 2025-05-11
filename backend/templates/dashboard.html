@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shipping Dashboard</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        display: flex;
+        min-height: 100vh;
+        background-color: #fff6f2;
+      }
+
+      .sidebar {
+        width: 280px;
+        background-color: #1D1D1D;
+        padding-top: 80px;
+        padding-left: 20px;
+        padding-right: 20px;
+        /* padding: 20px; */
+        color: white;
+        font-size: 1.1em;
+        font-weight: bold;
+      }
+
+      .sidebar-item {
+        padding: 12px;
+        margin: 15px 0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .sidebar-item:hover {
+        background-color: #FF4B0A;
+      }
+
+      .sidebar-item.active {
+        background-color: #FF4B0A;
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 30px;
+        padding-top: 0px;
+        display: flex;
+        gap: 30px;
+      }
+
+      .left-section {
+        flex: 1;
+      }
+
+      .right-section {
+        width: 400px;
+      }
+
+      .header {
+        color: black;
+        padding: 30px;
+        padding-bottom: 0px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: #FF4B0A;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .stat-title {
+        color: white;
+        font-size: 1.2em;
+        font-weight: bold;
+      }
+
+      .stat-value {
+        color: white;
+        font-size: 1.8em;
+        font-weight: bold;
+        margin: 10px 0;
+      }
+
+      .stat-change {
+        color: #000000;
+        font-size: 0.9em;
+        font-weight: 600;
+      }
+
+      .order-status-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .status-card {
+        background: #333333;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .status-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .status-icon.ongoing {
+        background-color: #e9e3ff;
+        color: #2d2654;
+      }
+
+      .status-icon.transit {
+        background-color: #e3f5ff;
+        color: #0088cc;
+      }
+
+      .status-icon.completed {
+        background-color: #e3ffe7;
+        color: #00cc44;
+      }
+
+      .status-info {
+        flex: 1;
+      }
+
+      .status-label {
+        color: white;
+        font-size: 1.0em;
+        font-weight:600;
+        margin-bottom: 10px;
+      }
+
+      .status-value {
+        color: white;
+        font-size: 1.8em;
+        font-weight: bold;
+      }
+
+      .current-parcels {
+        background: #333333;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        height: calc(100vh - 100px);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .parcels-container {
+        flex: 1;
+        overflow-y: auto;
+        margin-top: 15px;
+      }
+
+      .current-parcels h1{
+        font-size: 2.0em;
+        font-weight: bold;
+        margin-bottom: 8px;
+
+      }
+      .parcel-item {
+        background: #1D1D1D;
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 15px;
+        position: relative;
+      }
+
+      .parcel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .order-id {
+        font-size: 1.1em;
+        font-weight: bold;
+      }
+
+      .status {
+        background: #FF4B0A;
+        color: white;
+        font-weight: bold;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9em;
+      }
+
+      .location-info {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 15px;
+      }
+
+      .date-info {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 20px;
+        color: #888;
+        font-size: 0.9em;
+      }
+
+      .progress-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        padding-top: 10px;
+      }
+
+      .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+      }
+
+      .progress-dot {
+        width: 12px;
+        height: 12px;
+        background: #ff7849;
+        border-radius: 50%;
+        margin-bottom: 5px;
+      }
+
+      .progress-dot.completed {
+        background: #4caf50;
+      }
+
+      .progress-dot.inactive {
+        background: #666;
+      }
+
+      .progress-line::before {
+        content: "";
+        position: absolute;
+        top: 15px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #666;
+        z-index: 0;
+      }
+
+      .progress-text {
+        font-size: 0.8em;
+        color: #888;
+      }
+
+      .add-parcel {
+        padding-top: 30px;
+        padding-bottom: 50px;
+        padding-left: 25px;
+        padding-right: 25px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        background-image: linear-gradient(to right, #FF4B0A, transparent), url('44941990.jpg'); /* Gradient and image */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat; /*Prevent image repeat*/
+      }
+
+      .add-parcel h2 {
+        color: white;
+        margin-bottom: 20px;
+        font-size: 2.0em;
+      }
+
+      .add-parcel-buttons {
+        display: flex;
+        gap: 20px;
+      }
+
+      .add-parcel-btn {
+        padding: 16px 25px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-single {
+        background: #1D1D1D;
+        color: white;
+      }
+
+      .btn-batch {
+        background: #1D1D1D;
+        color: white;
+      }
+
+      .add-parcel-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .profile-pic {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <div class="sidebar-item active">Dashboard</div>
+      <div class="sidebar-item">Parcel History</div>
+      <div class="sidebar-item">Export Data</div>
+      <div class="sidebar-item">Settings</div>
+      <div class="sidebar-item">Support</div>
+    </div>
+
+    <div class="">
+        <div class="header">
+            <div>
+                <h1>Hello, Durgesh!</h1>
+                <p>Here's overview of your Parcels !</p>
+            </div>
+            <div class="user-profile">
+                <div class="profile-pic"></div>
+                <span>Durgesh Bhusnale</span>
+            </div>
+        </div>  
+      <div class="main-content">
+        <div class="left-section">
+          <div class="stats-container">
+            <div class="stat-card">
+              <div class="stat-title">Total Parcels</div>
+              <div class="stat-value">22</div>
+              <div class="stat-change">Multiple pincodes</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">Total Shipments</div>
+              <div class="stat-value">13</div>
+              <div class="stat-change">-1.2% from last month</div>
+            </div>
+          </div>
+
+          <div class="add-parcel">
+            <h2>Add Parcel</h2>
+            <div class="add-parcel-buttons">
+              <button class="add-parcel-btn btn-single" onclick="location.href='/add_parcel_single'">Single Address Capture</button>
+              <button class="add-parcel-btn btn-batch" onclick="location.href='/batch_address_capture'">Batch Addresses Capture</button>
+            </div>
+          </div>
+
+          <div class="order-status-grid">
+            <div class="status-card">
+              <div class="status-icon ongoing">📦</div>
+              <div class="status-info">
+                <div class="status-label">OnGoing Deliveries</div>
+                <div class="status-value">10</div>
+              </div>
+            </div>
+            <div class="status-card">
+              <div class="status-icon transit">🚚</div>
+              <div class="status-info">
+                <div class="status-label">In Transit Deliveries</div>
+                <div class="status-value">12</div>
+              </div>
+            </div>
+            <div class="status-card">
+              <div class="status-icon completed">✓</div>
+              <div class="status-info">
+                <div class="status-label">Completed Deliveries</div>
+                <div class="status-value">23</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-section">
+          <div class="current-parcels">
+            <h1>Current Parcels</h1>
+            <div class="parcels-container">
+              <div class="parcel-item">
+                <div class="parcel-header">
+                  <span class="order-id">ORD-123456789</span>
+                  <span class="status">In Transit</span>
+                </div>
+                <div class="location-info">
+                  <div>
+                    <div style="color: #888">From</div>
+                    <div>Ganesh Peth, Pune</div>
+                  </div>
+                  <div>
+                    <div style="color: #888">To</div>
+                    <div>Pune Main Nodal Center</div>
+                  </div>
+                </div>
+                <div class="date-info">
+                  <div>
+                    <div>Placed by</div>
+                    <div>12 Mar, 2025</div>
+                  </div>
+                  <div>
+                    <div>Estimated Date</div>
+                    <div>26 Mar, 2025</div>
+                  </div>
+                </div>
+                <div class="progress-line">
+                  <div class="progress-step">
+                    <div class="progress-dot completed"></div>
+                    <span class="progress-text">Packed</span>
+                  </div>
+                  <div class="progress-step">
+                    <div class="progress-dot completed"></div>
+                    <span class="progress-text">Shipped</span>
+                  </div>
+                  <div class="progress-step">
+                    <div class="progress-dot"></div>
+                    <span class="progress-text">In Transit</span>
+                  </div>
+                  <div class="progress-step">
+                    <div class="progress-dot inactive"></div>
+                    <span class="progress-text">Delivered</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="parcel-item">
+                <div class="parcel-header">
+                  <span class="order-id">ORD-987654321</span>
+                  <span class="status">Packed</span>
+                </div>
+                <div class="location-info">
+                  <div>
+                    <div style="color: #888">From</div>
+                    <div>546 Shivaji Nagar</div>
+                  </div>
+                  <div>
+                    <div style="color: #888">To</div>
+                    <div>Kolhapur Delivery Center</div>
+                  </div>
+                </div>
+                <div class="date-info">
+                  <div>
+                    <div>Placed by</div>
+                    <div>14 Mar, 2025</div>
+                  </div>
+                  <div>
+                    <div>Estimated Date</div>
+                    <div>28 Mar, 2025</div>
+                  </div>
+                </div>
+                <div class="progress-line">
+                  <div class="progress-step">
+                    <div class="progress-dot completed"></div>
+                    <span class="progress-text">Packed</span>
+                  </div>
+                  <div class="progress-step">
+                    <div class="progress-dot inactive"></div>
+                    <span class="progress-text">Shipped</span>
+                  </div>
+                  <div class="progress-step">
+                    <div class="progress-dot inactive"></div>
+                    <span class="progress-text">In Transit</span>
+                  </div>
+                  <div class="progress-step">
+                    <div class="progress-dot inactive"></div>
+                    <span class="progress-text">Delivered</span>
+                  </div>
+                </div>
+              </div>
+              <div class="parcel-item">
+                <div class="parcel-header">
+                  <span class="order-id">ORD-987654321</span>
+                  <span class="status">Packed</span>
+                </div>
+                <div class="location-info">
+                  <div>
+                    <div style="color: #888">From</div>
+                    <div>101 Solapur</div>
+                  </div>
+                  <div>
+                    <div style="color: #888">To</div>
+                    <div>Jalgaon City Delivery</div>
+                  </div>
+                </div>
+                <div class="date-info">
+                  <div>
+                    <div>Placed by</div>
+                    <div>21 Mar, 2025</div>
+                  </div>
+                  <div>
+                    <div>Estimated Date</div>
+                    <div>28 Mar, 2025</div>
+                  </div>
+                </div>
+                <div class="progress-line">
+                  <div class="progress-step">
+                    <div class="progress-dot completed"></div>
+                    <span class="progress-text">Packed</span>
+                  </div>
+                  <div class="progress-step">
+                    <div class="progress-dot inactive"></div>
+                    <span class="progress-text">Shipped</span>
+                  </div>
+                  <div class="progress-step">
+                    <div class="progress-dot inactive"></div>
+                    <span class="progress-text">In Transit</span>
+                  </div>
+                  <div class="progress-step">
+                    <div class="progress-dot inactive"></div>
+                    <span class="progress-text">Delivered</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
